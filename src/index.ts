@@ -51,6 +51,8 @@ const app = new Elysia()
       max: 100,
       duration: 60_000,
       scoping: "global",
+      // x-forwarded-for is safe here: Vercel/Cloudflare overwrite it at the edge.
+      // If deploying behind a proxy that doesn't, replace with server.requestIP or equivalent.
       generator: (req) => req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown",
     }),
   )

@@ -5,6 +5,7 @@ const isProduction = process.env.NODE_ENV === "production";
 function createTransport() {
   if (isProduction) return undefined;
   try {
+    require.resolve("pino-pretty");
     return { target: "pino-pretty", options: { colorize: true } };
   } catch {
     return undefined;
