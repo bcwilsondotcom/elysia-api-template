@@ -7,3 +7,4 @@ drizzle/
 *.log
 .DS_Store
 
+/.claude
