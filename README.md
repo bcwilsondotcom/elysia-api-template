@@ -35,6 +35,10 @@ No manual response annotations needed — Drizzle queries, BetterAuth types, Str
 Validation errors return `{ error: string }` with 400 status. Built into the app from day 1.
 No per-route error handling boilerplate.
 
+### Dependency Notes
+
+`@sinclair/typebox` is pinned to `0.34.49` via `overrides` in `package.json` to resolve a version conflict between `drizzle-typebox` and `@elysiajs/openapi`. Remove the override after both packages align on the same typebox version.
+
 ## Getting Started
 
 ```bash
@@ -50,25 +54,30 @@ cp .env.example .env.local
 # Fill in DATABASE_URL, BETTER_AUTH_SECRET, etc.
 
 # 4. Run
-bun run dev
+just dev
 ```
 
 API at `http://localhost:3000`. Docs at `/docs` (Scalar UI).
 
-## Scripts
+## Commands
+
+Requires [just](https://github.com/casey/just). Run `just` to see all available commands.
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Dev server with hot reload |
-| `bun run start` | Production start |
-| `bun run typecheck` | TypeScript check |
-| `bun run lint` | Biome lint + format check |
-| `bun run lint:fix` | Auto-fix lint + format |
-| `bun test` | Run tests |
-| `bun run db:generate` | Generate Drizzle migrations |
-| `bun run db:migrate` | Run migrations |
-| `bun run db:push` | Push schema directly (dev) |
-| `bun run db:studio` | Drizzle Studio GUI |
+| `just dev` | Dev server with hot reload |
+| `just start` | Production start |
+| `just test` | Run tests |
+| `just lint` | Biome lint + format check |
+| `just fix` | Auto-fix lint + format |
+| `just typecheck` | TypeScript check |
+| `just ci` | Full CI locally (typecheck + lint + test + build) |
+| `just build` | Bundle for production |
+| `just db-generate` | Generate Drizzle migrations |
+| `just db-migrate` | Run migrations |
+| `just db-push` | Push schema directly (dev) |
+| `just db-studio` | Drizzle Studio GUI |
+| `just load-test` | k6 load test |
 
 ## Project Structure
 
@@ -105,7 +114,7 @@ tests/
 ```typescript
 // src/routes/bookings.ts
 import { Elysia, t } from "elysia";
-import { db } from "../lib/db";
+import { getDb } from "../lib/db";
 import { bookings } from "../db/schema";
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 
@@ -114,7 +123,7 @@ const insertBooking = createInsertSchema(bookings);
 const selectBooking = createSelectSchema(bookings);
 
 export const bookingRoutes = new Elysia({ prefix: "/bookings" })
-  .post("/", ({ body }) => db.insert(bookings).values(body).returning(), {
+  .post("/", ({ body }) => getDb().insert(bookings).values(body).returning(), {
     body: insertBooking,
     response: t.Array(selectBooking),
     detail: { tags: ["Bookings"], summary: "Create booking" },
@@ -153,8 +162,8 @@ No code generation. No Orval. No OpenAPI → client pipeline. Just import the ty
 
 1. Fork or use as GitHub template
 2. Update `package.json` name/description
-3. Update CORS origins in `src/index.ts`
-4. Update OpenAPI title/description in `src/index.ts`
+3. Set `CORS_ORIGINS` in your environment (comma-separated allowed origins)
+4. OpenAPI title/version/description are read from `package.json` automatically
 5. Add your DB schema in `src/db/schema.ts`
 6. Wire up BetterAuth (org plugin for multi-tenant)
 7. Add routes in `src/routes/`

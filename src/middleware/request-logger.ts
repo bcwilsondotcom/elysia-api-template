@@ -12,6 +12,7 @@ export const requestLogger = new Elysia({ name: "request-logger" })
     const ms = Math.round((performance.now() - startTime) * 100) / 100;
     log.info(
       {
+        requestId: set.headers["x-request-id"],
         method: request.method,
         path: url.pathname,
         status: set.status || 200,

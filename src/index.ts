@@ -4,19 +4,33 @@ import { opentelemetry } from "@elysiajs/opentelemetry";
 import { serverTiming } from "@elysiajs/server-timing";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
+import pkg from "../package.json";
 import { createLogger } from "./lib/logger";
+import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
+import { securityHeaders } from "./middleware/security-headers";
 import { healthRoutes } from "./routes/health";
 
 const log = createLogger({ module: "app" });
 
+function parseCorsOrigins(): (string | RegExp)[] {
+  const env = process.env.CORS_ORIGINS;
+  if (!env) return [/localhost:\d+/];
+  return env
+    .split(",")
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
+}
+
 const app = new Elysia()
+  .use(securityHeaders)
+  .use(requestId)
   .use(opentelemetry())
   .use(serverTiming())
   .use(requestLogger)
   .use(
     cors({
-      origin: [/localhost:\d+/, /\.vercel\.app$/],
+      origin: parseCorsOrigins(),
       credentials: true,
     }),
   )
@@ -28,9 +42,9 @@ const app = new Elysia()
       references: fromTypes(),
       documentation: {
         info: {
-          title: "API",
-          version: "1.0.0",
-          description: "API documentation — auto-generated via OpenAPI Type Gen",
+          title: pkg.name,
+          version: pkg.version,
+          description: pkg.description,
         },
       },
     }),
@@ -40,13 +54,24 @@ const app = new Elysia()
       max: 100,
       duration: 60_000,
       scoping: "global",
+      // When TRUST_PROXY=1, the edge/proxy (e.g. Vercel, Cloudflare) overwrites
+      // x-forwarded-for with the real client IP, so it's safe to use as the key.
+      // Otherwise fall back to the TCP-layer address reported by the server,
+      // which cannot be spoofed by the client.
+      generator: (req, server) => {
+        if (process.env.TRUST_PROXY === "1") {
+          const xff = req.headers.get("x-forwarded-for")?.split(",")[0].trim();
+          if (xff) return xff;
+        }
+        return server?.requestIP(req)?.address ?? "unknown";
+      },
     }),
   )
   .onError(({ code, error, set }) => {
     // Validation errors → 400 with clean message
     if (code === "VALIDATION") {
       set.status = 400;
-      return { error: error.message };
+      return { error: "Validation failed" };
     }
 
     // Not found → 404

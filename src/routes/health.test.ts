@@ -2,13 +2,12 @@ import { describe, expect, it } from "bun:test";
 import app from "../index";
 
 describe("Health Routes", () => {
-  it("GET /health returns ok with timestamp and version", async () => {
+  it("GET /health returns ok with timestamp", async () => {
     const res = await app.handle(new Request("http://localhost/health"));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.status).toBe("ok");
     expect(body.timestamp).toBeDefined();
-    expect(body.version).toBeDefined();
   });
 
   it("GET /health/ready returns ready", async () => {

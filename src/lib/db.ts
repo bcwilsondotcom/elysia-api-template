@@ -12,10 +12,3 @@ export function getDb() {
   }
   return _db;
 }
-
-// Convenience alias — use getDb() in routes
-export const db = new Proxy({} as ReturnType<typeof drizzle>, {
-  get(_, prop) {
-    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});

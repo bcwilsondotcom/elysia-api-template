@@ -23,11 +23,3 @@ describe("getDb", () => {
     expect(() => getDb()).toThrow("DATABASE_URL is required");
   });
 });
-
-describe("db proxy", () => {
-  it("does not throw on import (lazy init)", async () => {
-    // The proxy itself can be imported without DATABASE_URL — it only throws on property access
-    const mod = await import("./db");
-    expect(mod.db).toBeDefined();
-  });
-});
