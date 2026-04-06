@@ -11,7 +11,24 @@ describe("Security Headers", () => {
   });
 
   it("does not set HSTS in non-production", async () => {
-    const res = await app.handle(new Request("http://localhost/health"));
-    expect(res.headers.get("strict-transport-security")).toBeNull();
+    const original = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+    try {
+      const res = await app.handle(new Request("http://localhost/health"));
+      expect(res.headers.get("strict-transport-security")).toBeNull();
+    } finally {
+      process.env.NODE_ENV = original;
+    }
+  });
+
+  it("sets HSTS in production", async () => {
+    const original = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    try {
+      const res = await app.handle(new Request("http://localhost/health"));
+      expect(res.headers.get("strict-transport-security")).toBe("max-age=63072000; includeSubDomains");
+    } finally {
+      process.env.NODE_ENV = original;
+    }
   });
 });

@@ -54,10 +54,17 @@ const app = new Elysia()
       max: 100,
       duration: 60_000,
       scoping: "global",
-      // x-forwarded-for is safe here: Vercel/Cloudflare overwrite it at the edge.
-      // If deploying without a trusted proxy, replace with server.requestIP or equivalent.
-      generator: (req, server) =>
-        req.headers.get("x-forwarded-for")?.split(",")[0].trim() || server?.requestIP(req)?.address || "unknown",
+      // When TRUST_PROXY=1, the edge/proxy (e.g. Vercel, Cloudflare) overwrites
+      // x-forwarded-for with the real client IP, so it's safe to use as the key.
+      // Otherwise fall back to the TCP-layer address reported by the server,
+      // which cannot be spoofed by the client.
+      generator: (req, server) => {
+        if (process.env.TRUST_PROXY === "1") {
+          const xff = req.headers.get("x-forwarded-for")?.split(",")[0].trim();
+          if (xff) return xff;
+        }
+        return server?.requestIP(req)?.address ?? "unknown";
+      },
     }),
   )
   .onError(({ code, error, set }) => {
