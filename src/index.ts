@@ -6,11 +6,13 @@ import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { createLogger } from "./lib/logger";
 import { requestLogger } from "./middleware/request-logger";
+import { securityHeaders } from "./middleware/security-headers";
 import { healthRoutes } from "./routes/health";
 
 const log = createLogger({ module: "app" });
 
 const app = new Elysia()
+  .use(securityHeaders)
   .use(opentelemetry())
   .use(serverTiming())
   .use(requestLogger)
