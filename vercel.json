@@ -1,0 +1,9 @@
+{
+  "buildCommand": "bun install --frozen-lockfile",
+  "installCommand": "bun install --frozen-lockfile",
+  "framework": null,
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/src/index.ts" }
+  ]
+}

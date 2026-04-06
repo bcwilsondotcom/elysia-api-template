@@ -1,0 +1,33 @@
+import { afterEach, describe, expect, it } from "bun:test";
+import { getDb } from "./db";
+
+describe("getDb", () => {
+  const originalUrl = process.env.DATABASE_URL;
+
+  afterEach(() => {
+    // Restore env
+    if (originalUrl) {
+      process.env.DATABASE_URL = originalUrl;
+    } else {
+      delete process.env.DATABASE_URL;
+    }
+  });
+
+  it("throws when DATABASE_URL is not set", () => {
+    delete process.env.DATABASE_URL;
+    expect(() => getDb()).toThrow("DATABASE_URL is required");
+  });
+
+  it("throws when DATABASE_URL is empty", () => {
+    process.env.DATABASE_URL = "";
+    expect(() => getDb()).toThrow("DATABASE_URL is required");
+  });
+});
+
+describe("db proxy", () => {
+  it("does not throw on import (lazy init)", async () => {
+    // The proxy itself can be imported without DATABASE_URL — it only throws on property access
+    const mod = await import("./db");
+    expect(mod.db).toBeDefined();
+  });
+});
