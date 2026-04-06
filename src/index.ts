@@ -5,6 +5,7 @@ import { serverTiming } from "@elysiajs/server-timing";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
 import { createLogger } from "./lib/logger";
+import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
 import { securityHeaders } from "./middleware/security-headers";
 import { healthRoutes } from "./routes/health";
@@ -13,6 +14,7 @@ const log = createLogger({ module: "app" });
 
 const app = new Elysia()
   .use(securityHeaders)
+  .use(requestId)
   .use(opentelemetry())
   .use(serverTiming())
   .use(requestLogger)

@@ -6,12 +6,13 @@ const log = createLogger({ module: "request" });
 /** Logs method + path + status + duration for every request (skips health checks) */
 export const requestLogger = new Elysia({ name: "request-logger" })
   .derive(() => ({ startTime: performance.now() }))
-  .onAfterResponse(({ request, set, startTime }) => {
+  .onAfterResponse(({ request, set, startTime, requestId }) => {
     const url = new URL(request.url);
     if (url.pathname.startsWith("/health")) return;
     const ms = Math.round((performance.now() - startTime) * 100) / 100;
     log.info(
       {
+        requestId: requestId as string | undefined,
         method: request.method,
         path: url.pathname,
         status: set.status || 200,

@@ -9,4 +9,9 @@ describe("Security Headers", () => {
     expect(res.headers.get("referrer-policy")).toBe("strict-origin-when-cross-origin");
     expect(res.headers.get("x-xss-protection")).toBe("0");
   });
+
+  it("does not set HSTS in non-production", async () => {
+    const res = await app.handle(new Request("http://localhost/health"));
+    expect(res.headers.get("strict-transport-security")).toBeNull();
+  });
 });
