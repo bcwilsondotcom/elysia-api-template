@@ -12,6 +12,12 @@ import { healthRoutes } from "./routes/health";
 
 const log = createLogger({ module: "app" });
 
+function parseCorsOrigins(): (string | RegExp)[] {
+  const env = process.env.CORS_ORIGINS;
+  if (!env) return [/localhost:\d+/];
+  return env.split(",").map((o) => o.trim());
+}
+
 const app = new Elysia()
   .use(securityHeaders)
   .use(requestId)
@@ -20,7 +26,7 @@ const app = new Elysia()
   .use(requestLogger)
   .use(
     cors({
-      origin: [/localhost:\d+/, /\.vercel\.app$/],
+      origin: parseCorsOrigins(),
       credentials: true,
     }),
   )
@@ -44,13 +50,14 @@ const app = new Elysia()
       max: 100,
       duration: 60_000,
       scoping: "global",
+      generator: (req) => req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown",
     }),
   )
   .onError(({ code, error, set }) => {
     // Validation errors → 400 with clean message
     if (code === "VALIDATION") {
       set.status = 400;
-      return { error: error.message };
+      return { error: "Validation failed" };
     }
 
     // Not found → 404
