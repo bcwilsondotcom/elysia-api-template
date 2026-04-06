@@ -4,12 +4,12 @@ import { opentelemetry } from "@elysiajs/opentelemetry";
 import { serverTiming } from "@elysiajs/server-timing";
 import { Elysia } from "elysia";
 import { rateLimit } from "elysia-rate-limit";
+import pkg from "../package.json";
 import { createLogger } from "./lib/logger";
 import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
 import { securityHeaders } from "./middleware/security-headers";
 import { healthRoutes } from "./routes/health";
-import pkg from "../package.json";
 
 const log = createLogger({ module: "app" });
 
