@@ -54,25 +54,30 @@ cp .env.example .env.local
 # Fill in DATABASE_URL, BETTER_AUTH_SECRET, etc.
 
 # 4. Run
-bun run dev
+just dev
 ```
 
 API at `http://localhost:3000`. Docs at `/docs` (Scalar UI).
 
-## Scripts
+## Commands
+
+Requires [just](https://github.com/casey/just). Run `just` to see all available commands.
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Dev server with hot reload |
-| `bun run start` | Production start |
-| `bun run typecheck` | TypeScript check |
-| `bun run lint` | Biome lint + format check |
-| `bun run lint:fix` | Auto-fix lint + format |
-| `bun test` | Run tests |
-| `bun run db:generate` | Generate Drizzle migrations |
-| `bun run db:migrate` | Run migrations |
-| `bun run db:push` | Push schema directly (dev) |
-| `bun run db:studio` | Drizzle Studio GUI |
+| `just dev` | Dev server with hot reload |
+| `just start` | Production start |
+| `just test` | Run tests |
+| `just lint` | Biome lint + format check |
+| `just fix` | Auto-fix lint + format |
+| `just typecheck` | TypeScript check |
+| `just ci` | Full CI locally (typecheck + lint + test + build) |
+| `just build` | Bundle for production |
+| `just db-generate` | Generate Drizzle migrations |
+| `just db-migrate` | Run migrations |
+| `just db-push` | Push schema directly (dev) |
+| `just db-studio` | Drizzle Studio GUI |
+| `just load-test` | k6 load test |
 
 ## Project Structure
 
