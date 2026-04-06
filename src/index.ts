@@ -16,7 +16,10 @@ const log = createLogger({ module: "app" });
 function parseCorsOrigins(): (string | RegExp)[] {
   const env = process.env.CORS_ORIGINS;
   if (!env) return [/localhost:\d+/];
-  return env.split(",").map((o) => o.trim());
+  return env
+    .split(",")
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
 }
 
 const app = new Elysia()
@@ -52,8 +55,9 @@ const app = new Elysia()
       duration: 60_000,
       scoping: "global",
       // x-forwarded-for is safe here: Vercel/Cloudflare overwrite it at the edge.
-      // If deploying behind a proxy that doesn't, replace with server.requestIP or equivalent.
-      generator: (req) => req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown",
+      // If deploying without a trusted proxy, replace with server.requestIP or equivalent.
+      generator: (req, server) =>
+        req.headers.get("x-forwarded-for")?.split(",")[0].trim() || server?.requestIP(req)?.address || "unknown",
     }),
   )
   .onError(({ code, error, set }) => {

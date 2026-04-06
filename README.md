@@ -163,7 +163,7 @@ No code generation. No Orval. No OpenAPI → client pipeline. Just import the ty
 1. Fork or use as GitHub template
 2. Update `package.json` name/description
 3. Set `CORS_ORIGINS` in your environment (comma-separated allowed origins)
-4. Update OpenAPI title/description in `src/index.ts`
+4. OpenAPI title/version/description are read from `package.json` automatically
 5. Add your DB schema in `src/db/schema.ts`
 6. Wire up BetterAuth (org plugin for multi-tenant)
 7. Add routes in `src/routes/`

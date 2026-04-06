@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import pino from "pino";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -5,7 +6,7 @@ const isProduction = process.env.NODE_ENV === "production";
 function createTransport() {
   if (isProduction) return undefined;
   try {
-    require.resolve("pino-pretty");
+    createRequire(import.meta.url).resolve("pino-pretty");
     return { target: "pino-pretty", options: { colorize: true } };
   } catch {
     return undefined;
