@@ -35,6 +35,10 @@ No manual response annotations needed — Drizzle queries, BetterAuth types, Str
 Validation errors return `{ error: string }` with 400 status. Built into the app from day 1.
 No per-route error handling boilerplate.
 
+### Dependency Notes
+
+`@sinclair/typebox` is pinned to `0.34.49` via `overrides` in `package.json` to resolve a version conflict between `drizzle-typebox` and `@elysiajs/openapi`. Remove the override after both packages align on the same typebox version.
+
 ## Getting Started
 
 ```bash
@@ -105,7 +109,7 @@ tests/
 ```typescript
 // src/routes/bookings.ts
 import { Elysia, t } from "elysia";
-import { db } from "../lib/db";
+import { getDb } from "../lib/db";
 import { bookings } from "../db/schema";
 import { createInsertSchema, createSelectSchema } from "drizzle-typebox";
 
@@ -114,7 +118,7 @@ const insertBooking = createInsertSchema(bookings);
 const selectBooking = createSelectSchema(bookings);
 
 export const bookingRoutes = new Elysia({ prefix: "/bookings" })
-  .post("/", ({ body }) => db.insert(bookings).values(body).returning(), {
+  .post("/", ({ body }) => getDb().insert(bookings).values(body).returning(), {
     body: insertBooking,
     response: t.Array(selectBooking),
     detail: { tags: ["Bookings"], summary: "Create booking" },
@@ -153,7 +157,7 @@ No code generation. No Orval. No OpenAPI → client pipeline. Just import the ty
 
 1. Fork or use as GitHub template
 2. Update `package.json` name/description
-3. Update CORS origins in `src/index.ts`
+3. Set `CORS_ORIGINS` in your environment (comma-separated allowed origins)
 4. Update OpenAPI title/description in `src/index.ts`
 5. Add your DB schema in `src/db/schema.ts`
 6. Wire up BetterAuth (org plugin for multi-tenant)
