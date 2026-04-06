@@ -9,6 +9,7 @@ import { requestId } from "./middleware/request-id";
 import { requestLogger } from "./middleware/request-logger";
 import { securityHeaders } from "./middleware/security-headers";
 import { healthRoutes } from "./routes/health";
+import pkg from "../package.json";
 
 const log = createLogger({ module: "app" });
 
@@ -38,9 +39,9 @@ const app = new Elysia()
       references: fromTypes(),
       documentation: {
         info: {
-          title: "API",
-          version: "1.0.0",
-          description: "API documentation — auto-generated via OpenAPI Type Gen",
+          title: pkg.name,
+          version: pkg.version,
+          description: pkg.description,
         },
       },
     }),
